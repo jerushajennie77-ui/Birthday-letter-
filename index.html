@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digital Birthday Letter Creator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Poppins', sans-serif; }
+    body { background-color: #f7f8fa; color: #333; padding: 20px; }
+    
+    .view-container { max-width: 650px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    h1 { text-align: center; font-size: 1.5rem; margin-bottom: 20px; color: #222; }
+
+    /* Form Inputs */
+    .form-group { margin-bottom: 18px; }
+    label { font-size: 0.8rem; font-weight: 600; color: #666; text-transform: uppercase; display: block; margin-bottom: 6px; }
+    input[type="text"], textarea { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; }
+    textarea { height: 90px; resize: vertical; }
+
+    /* Upload Box */
+    .upload-box { border: 2px dashed #ccc; padding: 20px; text-align: center; border-radius: 8px; cursor: pointer; color: #777; margin-bottom: 12px; }
+    .upload-box:hover { border-color: #999; }
+    .preview-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .preview-thumb { width: 70px; height: 70px; border-radius: 8px; object-fit: cover; }
+
+    .btn { display: block; width: 100%; padding: 12px; background: #1e1e24; color: #fff; text-align: center; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; font-weight: 600; }
+    .btn:hover { background: #333; }
+
+    /* Card Opening State */
+    #letterView { display: none; text-align: center; }
+    .envelope-card { background: #fff1f2; border: 2px solid #ffe4e6; border-radius: 12px; padding: 40px 20px; cursor: pointer; transition: transform 0.2s; }
+    .envelope-card:hover { transform: scale(1.02); }
+    .envelope-title { font-family: 'Caveat', cursive; font-size: 2.2rem; color: #e11d48; margin-bottom: 8px; }
+    .tap-btn { background: #e11d48; color: white; padding: 8px 18px; border-radius: 20px; font-size: 0.85rem; display: inline-block; margin-top: 15px; }
+
+    /* Full Revealed Content */
+    #revealedLetter { display: none; background: #fff; border-radius: 12px; padding: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: left; }
+    .letter-header { font-family: 'Caveat', cursive; font-size: 2rem; color: #e11d48; text-align: center; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+    .section-block { margin-bottom: 20px; }
+    .section-title { font-size: 0.8rem; font-weight: 700; color: #999; text-transform: uppercase; margin-bottom: 4px; }
+    .section-text { font-size: 0.95rem; color: #444; white-space: pre-line; line-height: 1.5; }
+    
+    .photo-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; margin-top: 20px; }
+    .photo-gallery img { width: 100%; height: 100px; object-fit: cover; border-radius: 8px; }
+    
+    .back-btn { margin-top: 20px; background: #888; }
+  </style>
+</head>
+<body>
+
+  <!-- STEP 1: Letter Creation Form -->
+  <div id="creatorForm" class="view-container">
+    <h1>Create Digital Birthday Letter</h1>
+    
+    <div class="form-group" style="display: flex; gap: 10px;">
+      <div style="flex:1;">
+        <label>To</label>
+        <input type="text" id="toName" value="Zohaib">
+      </div>
+      <div style="flex:1;">
+        <label>From</label>
+        <input type="text" id="fromName" value="Jennie">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Your main message</label>
+      <textarea id="mainMessage">Happy birthday dear zohaib,\nYou've been such a good friend to me. Im so grateful for that, you're an amazing person a beautiful soul and I wish you all the best for your life ahead.</textarea>
+    </div>
+
+    <div class="form-group">
+      <label>What I Love Most About You</label>
+      <textarea id="loveMost">Your ability to listen to my yapping\nYour great sense of humor\nAnd the way you carry the conversations</textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Our Story</label>
+      <textarea id="ourStory" placeholder="Tell a bit of your story..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Dreams Together</label>
+      <textarea id="dreamsTogether">I just hope all your dreams and wishes come true\nAnd I genuinely... From the depth of my heart\nWant you to be happy and peaceful. ❤️</textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Photos</label>
+      <div class="upload-box" onclick="document.getElementById('imageInput').click()">
+        <span>Click to upload photos</span>
+        <input type="file" id="imageInput" multiple accept="image/*" style="display:none">
+      </div>
+      <div id="previewGrid" class="preview-grid"></div>
+    </div>
+
+    <button class="btn" onclick="generateCard()">Generate Birthday Page</button>
+  </div>
+
+  <!-- STEP 2: Interactive Envelope View -->
+  <div id="letterView" class="view-container">
+    
+    <div id="closedEnvelope" class="envelope-card" onclick="openLetter()">
+      <div class="envelope-title">To <span id="cardTo"></span></div>
+      <div style="color: #666; font-size: 0.9rem;">From <span id="cardFrom"></span></div>
+      <div class="tap-btn">Tap to open ✨</div>
+    </div>
+
+    <!-- STEP 3: Full Letter View -->
+    <div id="revealedLetter">
+      <div class="letter-header">Happy Birthday!</div>
+
+      <div class="section-block" id="secMain">
+        <div class="section-title">Your main message</div>
+        <div class="section-text" id="viewMain"></div>
+      </div>
+
+      <div class="section-block" id="secLove">
+        <div class="section-title">What I Love Most About You</div>
+        <div class="section-text" id="viewLove"></div>
+      </div>
+
+      <div class="section-block" id="secStory">
+        <div class="section-title">Our Story</div>
+        <div class="section-text" id="viewStory"></div>
+      </div>
+
+      <div class="section-block" id="secDreams">
+        <div class="section-title">Dreams Together</div>
+        <div class="section-text" id="viewDreams"></div>
+      </div>
+
+      <div class="photo-gallery" id="viewGallery"></div>
+
+      <button class="btn back-btn" onclick="resetForm()">Edit Message</button>
+    </div>
+
+  </div>
+
+  <script>
+    let uploadedImages = [];
+
+    // Image Upload Handling
+    document.getElementById('imageInput').addEventListener('change', function(e) {
+      const files = Array.from(e.target.files);
+      files.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          uploadedImages.push(event.target.result);
+          renderPreviews();
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    function renderPreviews() {
+      const grid = document.getElementById('previewGrid');
+      grid.innerHTML = '';
+      uploadedImages.forEach(src => {
+        const img = document.createElement('img');
+        img.src = src;
+        img.className = 'preview-thumb';
+        grid.appendChild(img);
+      });
+    }
+
+    // Switch to Envelope View
+    function generateCard() {
+      document.getElementById('cardTo').textContent = document.getElementById('toName').value;
+      document.getElementById('cardFrom').textContent = document.getElementById('fromName').value;
+
+      document.getElementById('creatorForm').style.display = 'none';
+      document.getElementById('letterView').style.display = 'block';
+      document.getElementById('closedEnvelope').style.display = 'block';
+      document.getElementById('revealedLetter').style.display = 'none';
+    }
+
+    // Open Letter Animation Action
+    function openLetter() {
+      document.getElementById('viewMain').textContent = document.getElementById('mainMessage').value;
+      document.getElementById('viewLove').textContent = document.getElementById('loveMost').value;
+      document.getElementById('viewStory').textContent = document.getElementById('ourStory').value;
+      document.getElementById('viewDreams').textContent = document.getElementById('dreamsTogether').value;
+
+      // Hide empty sections
+      document.getElementById('secStory').style.display = document.getElementById('ourStory').value.trim() ? 'block' : 'none';
+
+      // Render Photos
+      const gallery = document.getElementById('viewGallery');
+      gallery.innerHTML = '';
+      uploadedImages.forEach(src => {
+        const img = document.createElement('img');
+        img.src = src;
+        gallery.appendChild(img);
+      });
+
+      document.getElementById('closedEnvelope').style.display = 'none';
+      document.getElementById('revealedLetter').style.display = 'block';
+    }
+
+    function resetForm() {
+      document.getElementById('creatorForm').style.display = 'block';
+      document.getElementById('letterView').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
